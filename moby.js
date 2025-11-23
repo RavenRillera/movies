@@ -164,7 +164,7 @@ app.delete('/api/v1/movies/:id', async (req, res) => {
             return res.status(404).json({ message: 'MOVIE NOT FOUND!' });
         }
 
-        // Return the deleted document as confirmation
+       
         res.json(deletedMovie);
 
     } catch (err) {
@@ -176,7 +176,7 @@ app.delete('/api/v1/movies/:id', async (req, res) => {
 // MONGODB ATLAS
 async function startServer() {
     try {
-        // Ensure you have MONGODB_URI set in your .env file
+        
         await mongoose.connect(process.env.MONGODB_URI); 
         console.log('✅ Connected to MongoDB Atlas');
         app.listen(PORT, () => console.log(`🚀 Movie Review API running on http://localhost:${PORT}`));
