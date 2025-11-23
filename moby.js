@@ -65,6 +65,30 @@ app.get('/api/v1/movies/:id', async (req, res) => {
     }
 });
 
+// REVIEW
+app.get('/api/v1/movies/:id/reviews', async (req, res) => {
+    try {
+        
+        const movie = await Movie.findById(req.params.id, 'title reviews');
+
+        if (!movie) {
+            // 404 Not Found
+            return res.status(404).json({ message: 'MOVIE NOT FOUND!' });
+        }
+        
+        
+        res.json({
+            movieId: req.params.id,
+            title: movie.title,
+            reviews: movie.reviews
+        });
+    } catch (err) {
+        
+        res.status(500).json({ message: err.message });
+    }
+});
+
+
 // POST
 
 // Create a new movie
@@ -164,7 +188,7 @@ app.delete('/api/v1/movies/:id', async (req, res) => {
             return res.status(404).json({ message: 'MOVIE NOT FOUND!' });
         }
 
-       
+        
         res.json(deletedMovie);
 
     } catch (err) {
