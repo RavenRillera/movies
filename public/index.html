@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITelekinesis | Movie Reviews</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0b;
+            --bg-secondary: #111113;
+            --bg-card: #18181b;
+            --bg-card-hover: #1f1f23;
+            --gold: #d4af37;
+            --gold-dim: #b8973a;
+            --gold-bright: #ffd700;
+            --cream: #f5f0e8;
+            --cream-dim: #c9c4bc;
+            --red-accent: #8b0000;
+            --red-bright: #dc143c;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --border-color: #27272a;
+            --shadow-gold: rgba(212, 175, 55, 0.15);
+            --shadow-dark: rgba(0, 0, 0, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Film grain overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Animated spotlight effect */
+        .spotlight {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 30%, rgba(212, 175, 55, 0.03) 0%, transparent 50%);
+            animation: spotlightMove 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes spotlightMove {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(10%, 5%); }
+            50% { transform: translate(5%, 10%); }
+            75% { transform: translate(-5%, 5%); }
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, transparent 100%);
+            padding: 2rem 0;
+            position: relative;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            position: relative;
+        }
+
+        .logo-icon::before {
+            content: '🎬';
+            font-size: 2.5rem;
+            filter: drop-shadow(0 0 10px var(--gold));
+        }
+
+        .logo h1 {
+            font-family: 'Bebas Neue', Impact, sans-serif;
+            font-size: 2.8rem;
+            letter-spacing: 0.15em;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--cream) 50%, var(--gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+        }
+
+        .tagline {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+        }
+
+        /* Add Movie Button */
+        .add-movie-btn {
+            font-family: 'Space Mono', monospace;
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            padding: 1rem 2rem;
+            font-size: 0.85rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .add-movie-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .add-movie-btn:hover {
+            background: var(--gold);
+            color: var(--bg-primary);
+            box-shadow: 0 0 30px var(--shadow-gold);
+            transform: translateY(-2px);
+        }
+
+        .add-movie-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Header Actions */
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .api-docs-btn {
+            font-family: 'Space Mono', monospace;
+            background: transparent;
+            border: 2px solid var(--cream-dim);
+            color: var(--cream-dim);
+            padding: 1rem 1.5rem;
+            font-size: 0.85rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .api-docs-btn:hover {
+            background: var(--cream);
+            color: var(--bg-primary);
+            border-color: var(--cream);
+            box-shadow: 0 0 20px rgba(245, 240, 232, 0.2);
+        }
+
+        .api-icon {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        /* API Guide Banner */
+        .api-guide-banner {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--gold);
+            border-radius: 4px;
+            margin-bottom: 3rem;
+            overflow: hidden;
+        }
+
+        .api-guide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .api-guide-header:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .api-guide-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .api-guide-icon {
+            font-size: 1.3rem;
+        }
+
+        .api-guide-title h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1rem;
+            letter-spacing: 0.2em;
+            color: var(--gold);
+            margin: 0;
+        }
+
+        .toggle-icon {
+            color: var(--text-secondary);
+            transition: transform 0.3s ease;
+        }
+
+        .api-guide-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+            padding: 0 1.5rem;
+        }
+
+        .api-guide-content.expanded {
+            max-height: 1000px;
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .api-intro {
+            font-size: 1rem;
+            color: var(--cream-dim);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .api-intro a {
+            color: var(--gold);
+            text-decoration: none;
+            border-bottom: 1px solid var(--gold-dim);
+            transition: color 0.2s ease;
+        }
+
+        .api-intro a:hover {
+            color: var(--gold-bright);
+        }
+
+        .api-endpoints {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .endpoint-group {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .endpoint-group h4 {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            color: var(--cream);
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .endpoint {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+            font-size: 0.85rem;
+            flex-wrap: wrap;
+        }
+
+        .endpoint .method {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            min-width: 55px;
+            text-align: center;
+        }
+
+        .endpoint.get .method { background: #2a9d8f; color: white; }
+        .endpoint.post .method { background: #e76f51; color: white; }
+        .endpoint.put .method { background: #f4a261; color: var(--bg-primary); }
+        .endpoint.delete .method { background: #e63946; color: white; }
+
+        .endpoint code {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--cream);
+            background: var(--bg-card);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+        }
+
+        .endpoint .desc {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            margin-left: auto;
+        }
+
+        .swagger-tips {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .swagger-tips h4 {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            color: var(--cream);
+            margin-bottom: 0.75rem;
+        }
+
+        .swagger-tips ol {
+            margin: 0;
+            padding-left: 1.25rem;
+            color: var(--cream-dim);
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .swagger-tips code {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--gold);
+            background: var(--bg-card);
+            padding: 0.1rem 0.3rem;
+            border-radius: 2px;
+        }
+
+        .swagger-tips a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+
+        .swagger-tips strong {
+            color: var(--cream);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8rem;
+            letter-spacing: 0.3em;
+            color: var(--cream);
+        }
+
+        .section-header::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+        }
+
+        /* Movies Grid */
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        /* Movie Card */
+        .movie-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.4s ease;
+            animation: cardFadeIn 0.6s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes cardFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .movie-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--gold-dim);
+            box-shadow: 0 20px 40px var(--shadow-dark), 0 0 60px var(--shadow-gold);
+        }
+
+        .movie-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--red-accent), var(--gold), var(--red-accent));
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .movie-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            background: linear-gradient(180deg, var(--bg-card-hover) 0%, var(--bg-card) 100%);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .movie-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--cream);
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .movie-meta {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.1em;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Rating Display */
+        .rating-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stars {
+            display: flex;
+            gap: 2px;
+        }
+
+        .star {
+            font-size: 1.2rem;
+            color: var(--border-color);
+            transition: color 0.2s ease;
+        }
+
+        .star.filled {
+            color: var(--gold);
+            text-shadow: 0 0 10px var(--gold);
+        }
+
+        .rating-text {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-left: 0.5rem;
+        }
+
+        /* Reviews Section in Card */
+        .reviews-preview {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            padding-right: 0.5rem;
+        }
+
+        .reviews-preview::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .reviews-preview::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .reviews-preview::-webkit-scrollbar-thumb {
+            background: var(--gold-dim);
+            border-radius: 2px;
+        }
+
+        .review-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .review-item:last-child {
+            border-bottom: none;
+        }
+
+        .review-rating {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 0.25rem;
+        }
+
+        .review-rating .star {
+            font-size: 0.8rem;
+        }
+
+        .review-comment {
+            font-size: 0.95rem;
+            color: var(--cream-dim);
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        .no-reviews {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 1rem;
+            border: 1px dashed var(--border-color);
+            border-radius: 4px;
+        }
+
+        /* Card Actions */
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .action-btn {
+            flex: 1;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .action-btn.review-btn:hover {
+            border-color: var(--gold-bright);
+            color: var(--gold-bright);
+        }
+
+        .action-btn.edit-btn:hover {
+            border-color: var(--cream);
+            color: var(--cream);
+        }
+
+        .action-btn.delete-btn:hover {
+            border-color: var(--red-bright);
+            color: var(--red-bright);
+            background: rgba(220, 20, 60, 0.1);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--gold-dim);
+            border-radius: 4px;
+            width: 90%;
+            max-width: 500px;
+            animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 25px 80px var(--shadow-dark), 0 0 100px var(--shadow-gold);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(180deg, var(--bg-card-hover) 0%, var(--bg-card) 100%);
+        }
+
+        .modal-header h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 0.2em;
+            color: var(--gold);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: var(--red-bright);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 20px var(--shadow-gold);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Star Rating Input */
+        .star-rating-input {
+            display: flex;
+            gap: 0.5rem;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+
+        .star-rating-input input {
+            display: none;
+        }
+
+        .star-rating-input label {
+            font-size: 2rem;
+            color: var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 0;
+        }
+
+        .star-rating-input label:hover,
+        .star-rating-input label:hover ~ label,
+        .star-rating-input input:checked ~ label {
+            color: var(--gold);
+            text-shadow: 0 0 15px var(--gold);
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            padding: 1.2rem 2rem;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
+            border: none;
+            border-radius: 4px;
+            color: var(--bg-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 700;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--shadow-gold);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem;
+            gap: 1rem;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 0.3em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            border: 2px dashed var(--border-color);
+            border-radius: 4px;
+            background: var(--bg-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 0.2em;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1002;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--gold);
+            border-radius: 4px;
+            color: var(--cream);
+            box-shadow: 0 10px 30px var(--shadow-dark);
+            animation: toastSlideIn 0.4s ease, toastFadeOut 0.4s ease 2.6s forwards;
+        }
+
+        .toast.error {
+            border-color: var(--red-bright);
+        }
+
+        .toast.success {
+            border-color: var(--gold);
+        }
+
+        @keyframes toastSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes toastFadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 4rem;
+        }
+
+        footer p {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        footer .credits {
+            margin-top: 0.5rem;
+            color: var(--gold-dim);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1.5rem;
+                text-align: center;
+            }
+
+            .logo {
+                flex-direction: column;
+            }
+
+            .logo h1 {
+                font-size: 2rem;
+            }
+
+            .header-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .api-docs-btn,
+            .add-movie-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .movies-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-actions {
+                flex-wrap: wrap;
+            }
+
+            .action-btn {
+                flex: 1 1 45%;
+            }
+
+            .modal {
+                width: 95%;
+                margin: 1rem;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold-dim);
+        }
+    </style>
+</head>
+<body>
+    <div class="spotlight"></div>
+
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <div>
+                    <h1>ITELEKINESIS</h1>
+                    <p class="tagline">Curated Film Reviews</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="/api-docs" target="_blank" class="api-docs-btn">
+                    <span class="api-icon">{ }</span> API Docs
+                </a>
+                <button class="add-movie-btn" onclick="openAddMovieModal()">
+                    + Add Movie
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- API Guide Banner -->
+        <div class="api-guide-banner max-w-4xl mx-auto rounded-lg" id="api-guide">
+        <div class="api-guide-header" onclick="toggleApiGuide()">
+            <div class="api-guide-title">
+                <span class="api-guide-icon">📖</span>
+                <h3>API DOCUMENTATION GUIDE</h3>
+            </div>
+            <span class="toggle-icon" id="toggle-icon">▼</span>
+        </div>
+        <div class="api-guide-content" id="api-guide-content">
+            <p class="api-intro text-lg text-gray-700">Access the full interactive documentation on the <a href="/api-docs" target="_blank" class="text-blue-600 hover:text-blue-800 font-semibold underline">Swagger UI</a> page to test all endpoints directly in your browser.</p>
+            
+            <div class="api-endpoints">
+                <div class="endpoint-group">
+                    <h4>🎬 MOVIES ENDPOINTS</h4>
+                    <div class="endpoint get">
+                        <span class="method">GET</span>
+                        <code>/api/v1/movies</code>
+                        <span class="desc">Fetch all movies</span>
+                    </div>
+                    <div class="endpoint post">
+                        <span class="method">POST</span>
+                        <code>/api/v1/movies</code>
+                        <span class="desc">Create new movie</span>
+                    </div>
+                    <div class="endpoint get">
+                        <span class="method">GET</span>
+                        <code>/api/v1/movies/{id}</code>
+                        <span class="desc">Get movie by ID</span>
+                    </div>
+                    <div class="endpoint put">
+                        <span class="method">PUT</span>
+                        <code>/api/v1/movies/{id}</code>
+                        <span class="desc">Update movie title</span>
+                    </div>
+                    <div class="endpoint delete">
+                        <span class="method">DELETE</span>
+                        <code>/api/v1/movies/{id}</code>
+                        <span class="desc">Delete a movie</span>
+                    </div>
+                </div>
+                
+                <div class="endpoint-group">
+                    <h4>⭐ REVIEWS ENDPOINTS </h4>
+                    <div class="endpoint get">
+                        <span class="method">GET</span>
+                        <code>/api/v1/movies/{id}/reviews</code>
+                        <span class="desc">Get all reviews for a movie</span>
+                    </div>
+                    <div class="endpoint post">
+                        <span class="method">POST</span>
+                        <code>/api/v1/movies/{id}/reviews</code>
+                        <span class="desc">Add a review to a movie</span>
+                    </div>
+                    
+                    <div class="endpoint patch">
+                        <span class="method">PATCH</span>
+                        <code>/api/v1/movies/{movieId}/reviews/{reviewId}</code>
+                        <span class="desc">Update specific review content/rating</span>
+                    </div>
+                    
+                    <div class="endpoint delete">
+                        <span class="method">DELETE</span>
+                        <code>/api/v1/movies/{movieId}/reviews/{reviewId}</code>
+                        <span class="desc">Delete a specific review</span>
+                    </div>
+                </div>
+            </div>
+
+                <div class="swagger-tips">
+                    <h4>💡 HOW TO USE SWAGGER UI</h4>
+                    <ol>
+                        <li>Click <a href="/api-docs" target="_blank">API Docs</a> button or visit <code>/api-docs</code></li>
+                        <li>Click on any endpoint to expand it</li>
+                        <li>Click <strong>"Try it out"</strong> button</li>
+                        <li>Fill in required parameters (like movie ID or request body)</li>
+                        <li>Click <strong>"Execute"</strong> to send the request</li>
+                        <li>View the response below with status code and data</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h2>FEATURED FILMS</h2>
+        </div>
+
+        <div id="movies-container" class="movies-grid">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading films...</p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>ITelekinesis &copy; 2025 — Movie Review Platform</p>
+        <p class="credits">Built by Sean, Raven & Noreen — IT ELEC 3</p>
+    </footer>
+
+    <!-- Add Movie Modal -->
+    <div id="add-movie-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>ADD NEW FILM</h3>
+                <button class="close-btn" onclick="closeModal('add-movie-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-movie-form" onsubmit="handleAddMovie(event)">
+                    <div class="form-group">
+                        <label for="movie-title">Film Title</label>
+                        <input type="text" id="movie-title" placeholder="Enter the movie title..." required>
+                    </div>
+                    <button type="submit" class="submit-btn">Add to Collection</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Movie Modal -->
+    <div id="edit-movie-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>EDIT FILM</h3>
+                <button class="close-btn" onclick="closeModal('edit-movie-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-movie-form" onsubmit="handleEditMovie(event)">
+                    <input type="hidden" id="edit-movie-id">
+                    <div class="form-group">
+                        <label for="edit-movie-title">New Title</label>
+                        <input type="text" id="edit-movie-title" placeholder="Enter new title..." required>
+                    </div>
+                    <button type="submit" class="submit-btn">Update Film</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Review Modal -->
+    <div id="add-review-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>WRITE A REVIEW</h3>
+                <button class="close-btn" onclick="closeModal('add-review-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-review-form" onsubmit="handleAddReview(event)">
+                    <input type="hidden" id="review-movie-id">
+                    <p id="review-movie-title" style="font-size: 1.2rem; color: var(--gold); margin-bottom: 1.5rem; font-style: italic;"></p>
+                    <div class="form-group">
+                        <label>Your Rating</label>
+                        <div class="star-rating-input">
+                            <input type="radio" name="rating" value="5" id="star5" required>
+                            <label for="star5">★</label>
+                            <input type="radio" name="rating" value="4" id="star4">
+                            <label for="star4">★</label>
+                            <input type="radio" name="rating" value="3" id="star3">
+                            <label for="star3">★</label>
+                            <input type="radio" name="rating" value="2" id="star2">
+                            <label for="star2">★</label>
+                            <input type="radio" name="rating" value="1" id="star1">
+                            <label for="star1">★</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="review-comment">Your Review</label>
+                        <textarea id="review-comment" placeholder="Share your thoughts on this film..." required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Submit Review</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>CONFIRM DELETION</h3>
+                <button class="close-btn" onclick="closeModal('delete-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 1.1rem; color: var(--cream-dim); margin-bottom: 1.5rem;">
+                    Are you sure you want to delete <span id="delete-movie-title" style="color: var(--gold); font-weight: 600;"></span>? This action cannot be undone.
+                </p>
+                <input type="hidden" id="delete-movie-id">
+                <div style="display: flex; gap: 1rem;">
+                    <button class="submit-btn" style="background: var(--border-color);" onclick="closeModal('delete-modal')">Cancel</button>
+                    <button class="submit-btn" style="background: linear-gradient(135deg, var(--red-bright) 0%, var(--red-accent) 100%);" onclick="confirmDelete()">Delete Film</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script>
+        const API_BASE = '/api/v1';
+
+        // Fetch and display all movies
+        async function fetchMovies() {
+            const container = document.getElementById('movies-container');
+            
+            try {
+                const response = await fetch(`${API_BASE}/movies`);
+                const movies = await response.json();
+
+                if (movies.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🎬</div>
+                            <h3>NO FILMS YET</h3>
+                            <p>Add your first movie to start building your collection.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = movies.map((movie, index) => createMovieCard(movie, index)).join('');
+
+            } catch (error) {
+                console.error('Error fetching movies:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <h3>CONNECTION ERROR</h3>
+                        <p>Unable to fetch movies. Please try again later.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Create movie card HTML
+        function createMovieCard(movie, index) {
+            const avgRating = calculateAvgRating(movie.reviews);
+            const reviewCount = movie.reviews?.length || 0;
+            const date = new Date(movie.createdAt).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+
+            return `
+                <div class="movie-card" style="animation-delay: ${index * 0.1}s">
+                    <div class="card-header">
+                        <h3 class="movie-title">${escapeHtml(movie.title)}</h3>
+                        <p class="movie-meta">Added ${date}</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="rating-display">
+                            <div class="stars">
+                                ${generateStars(avgRating)}
+                            </div>
+                            <span class="rating-text">${avgRating > 0 ? avgRating.toFixed(1) : 'N/A'} (${reviewCount} ${reviewCount === 1 ? 'review' : 'reviews'})</span>
+                        </div>
+                        <div class="reviews-preview">
+                            ${movie.reviews?.length > 0 
+                                ? movie.reviews.slice(-3).reverse().map(review => `
+                                    <div class="review-item">
+                                        <div class="review-rating">${generateStars(review.rating)}</div>
+                                        <p class="review-comment">"${escapeHtml(review.comment)}"</p>
+                                    </div>
+                                `).join('')
+                                : '<p class="no-reviews">No reviews yet. Be the first to review!</p>'
+                            }
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="action-btn review-btn" onclick="openReviewModal('${movie._id}', '${escapeHtml(movie.title)}')">Review</button>
+                        <button class="action-btn edit-btn" onclick="openEditModal('${movie._id}', '${escapeHtml(movie.title)}')">Edit</button>
+                        <button class="action-btn delete-btn" onclick="openDeleteModal('${movie._id}', '${escapeHtml(movie.title)}')">Delete</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Calculate average rating
+        function calculateAvgRating(reviews) {
+            if (!reviews || reviews.length === 0) return 0;
+            const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+            return sum / reviews.length;
+        }
+
+        // Generate star HTML
+        function generateStars(rating) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                stars += `<span class="star ${i <= Math.round(rating) ? 'filled' : ''}">★</span>`;
+            }
+            return stars;
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML.replace(/'/g, "\\'").replace(/"/g, '\\"');
+        }
+
+        // Modal functions
+        function openAddMovieModal() {
+            document.getElementById('add-movie-form').reset();
+            document.getElementById('add-movie-modal').classList.add('active');
+        }
+
+        function openEditModal(id, title) {
+            document.getElementById('edit-movie-id').value = id;
+            document.getElementById('edit-movie-title').value = title.replace(/\\'/g, "'").replace(/\\"/g, '"');
+            document.getElementById('edit-movie-modal').classList.add('active');
+        }
+
+        function openReviewModal(id, title) {
+            document.getElementById('review-movie-id').value = id;
+            document.getElementById('review-movie-title').textContent = title.replace(/\\'/g, "'").replace(/\\"/g, '"');
+            document.getElementById('add-review-form').reset();
+            document.getElementById('add-review-modal').classList.add('active');
+        }
+
+        function openDeleteModal(id, title) {
+            document.getElementById('delete-movie-id').value = id;
+            document.getElementById('delete-movie-title').textContent = title.replace(/\\'/g, "'").replace(/\\"/g, '"');
+            document.getElementById('delete-modal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Close modal on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+            }
+        });
+
+        // Form handlers
+        async function handleAddMovie(event) {
+            event.preventDefault();
+            const title = document.getElementById('movie-title').value.trim();
+
+            try {
+                const response = await fetch(`${API_BASE}/movies`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title })
+                });
+
+                if (response.ok) {
+                    showToast('Film added successfully!', 'success');
+                    closeModal('add-movie-modal');
+                    fetchMovies();
+                } else {
+                    const error = await response.json();
+                    showToast(error.message || 'Failed to add film', 'error');
+                }
+            } catch (error) {
+                showToast('Connection error. Please try again.', 'error');
+            }
+        }
+
+        async function handleEditMovie(event) {
+            event.preventDefault();
+            const id = document.getElementById('edit-movie-id').value;
+            const title = document.getElementById('edit-movie-title').value.trim();
+
+            try {
+                const response = await fetch(`${API_BASE}/movies/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title })
+                });
+
+                if (response.ok) {
+                    showToast('Film updated successfully!', 'success');
+                    closeModal('edit-movie-modal');
+                    fetchMovies();
+                } else {
+                    const error = await response.json();
+                    showToast(error.message || 'Failed to update film', 'error');
+                }
+            } catch (error) {
+                showToast('Connection error. Please try again.', 'error');
+            }
+        }
+
+        async function handleAddReview(event) {
+            event.preventDefault();
+            const id = document.getElementById('review-movie-id').value;
+            const rating = parseInt(document.querySelector('input[name="rating"]:checked')?.value);
+            const comment = document.getElementById('review-comment').value.trim();
+
+            if (!rating) {
+                showToast('Please select a rating', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/movies/${id}/reviews`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rating, comment })
+                });
+
+                if (response.ok) {
+                    showToast('Review submitted successfully!', 'success');
+                    closeModal('add-review-modal');
+                    fetchMovies();
+                } else {
+                    const error = await response.json();
+                    showToast(error.message || 'Failed to submit review', 'error');
+                }
+            } catch (error) {
+                showToast('Connection error. Please try again.', 'error');
+            }
+        }
+
+        async function confirmDelete() {
+            const id = document.getElementById('delete-movie-id').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/movies/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showToast('Film deleted successfully!', 'success');
+                    closeModal('delete-modal');
+                    fetchMovies();
+                } else {
+                    const error = await response.json();
+                    showToast(error.message || 'Failed to delete film', 'error');
+                }
+            } catch (error) {
+                showToast('Connection error. Please try again.', 'error');
+            }
+        }
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Toggle API Guide
+        function toggleApiGuide() {
+            const content = document.getElementById('api-guide-content');
+            const icon = document.getElementById('toggle-icon');
+            content.classList.toggle('expanded');
+            icon.style.transform = content.classList.contains('expanded') ? 'rotate(180deg)' : 'rotate(0)';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', fetchMovies);
+    </script>
+</body>
+</html>
+
