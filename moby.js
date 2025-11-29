@@ -10,6 +10,7 @@ const path = require('path');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -88,7 +89,7 @@ const swaggerOptions = {
             }
         }
     },
-    apis: ['./moby.js']
+    apis: [path.join(__dirname, 'moby.js')]
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
