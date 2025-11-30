@@ -120,7 +120,10 @@ app.get('/api-docs', (req, res) => {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css">
     <style>
         body { margin: 0; background: #1a1a1a; }
-        .swagger-ui .topbar { display: none }
+        .swagger-ui { background: #1a1a1a; }
+        .swagger-ui .topbar { display: none; }
+        
+        /* Title styling */
         .swagger-ui .info .title { color: #d4af37; font-size: 2.5rem; }
         .swagger-ui .info { margin: 30px 0; }
         .swagger-ui .info .title small { display: none !important; }
@@ -128,13 +131,63 @@ app.get('/api-docs', (req, res) => {
         .swagger-ui .info hgroup.main a { display: none !important; }
         .swagger-ui .info .base-url { display: none !important; }
         .swagger-ui .info .description { display: none !important; }
-        .swagger-ui .opblock.opblock-get .opblock-summary-method { background: #2a9d8f; }
-        .swagger-ui .opblock.opblock-post .opblock-summary-method { background: #e76f51; }
-        .swagger-ui .opblock.opblock-put .opblock-summary-method { background: #f4a261; }
-        .swagger-ui .opblock.opblock-patch .opblock-summary-method { background: #264653; }
-        .swagger-ui .opblock.opblock-delete .opblock-summary-method { background: #e63946; }
-        .swagger-ui .btn.execute { background: #d4af37; border-color: #d4af37; }
+        
+        /* Make all text readable - light colors */
+        .swagger-ui, 
+        .swagger-ui .opblock-tag,
+        .swagger-ui .opblock .opblock-summary-description,
+        .swagger-ui .opblock .opblock-summary-path,
+        .swagger-ui .opblock .opblock-summary-path span,
+        .swagger-ui .opblock-description-wrapper p,
+        .swagger-ui .opblock-body pre,
+        .swagger-ui .response-col_description,
+        .swagger-ui table thead tr td,
+        .swagger-ui table thead tr th,
+        .swagger-ui .parameter__name,
+        .swagger-ui .parameter__type,
+        .swagger-ui .prop-format,
+        .swagger-ui .model-title,
+        .swagger-ui label,
+        .swagger-ui .model,
+        .swagger-ui section.models h4,
+        .swagger-ui .servers-title,
+        .swagger-ui .servers label { 
+            color: #ffffff !important; 
+        }
+        
+        /* Tag descriptions */
+        .swagger-ui .opblock-tag small { color: #cccccc !important; }
+        
+        /* Paths - bright white */
+        .swagger-ui .opblock .opblock-summary-path { color: #ffffff !important; font-weight: 600; }
+        
+        /* Descriptions - light gray */
+        .swagger-ui .opblock .opblock-summary-description { color: #e0e0e0 !important; }
+        
+        /* Method buttons */
+        .swagger-ui .opblock.opblock-get .opblock-summary-method { background: #2a9d8f; color: #fff; }
+        .swagger-ui .opblock.opblock-post .opblock-summary-method { background: #e76f51; color: #fff; }
+        .swagger-ui .opblock.opblock-put .opblock-summary-method { background: #f4a261; color: #000; }
+        .swagger-ui .opblock.opblock-patch .opblock-summary-method { background: #5c6bc0; color: #fff; }
+        .swagger-ui .opblock.opblock-delete .opblock-summary-method { background: #e63946; color: #fff; }
+        
+        /* Operation blocks background */
+        .swagger-ui .opblock.opblock-get { background: rgba(42, 157, 143, 0.15); border-color: #2a9d8f; }
+        .swagger-ui .opblock.opblock-post { background: rgba(231, 111, 81, 0.15); border-color: #e76f51; }
+        .swagger-ui .opblock.opblock-put { background: rgba(244, 162, 97, 0.15); border-color: #f4a261; }
+        .swagger-ui .opblock.opblock-patch { background: rgba(92, 107, 192, 0.15); border-color: #5c6bc0; }
+        .swagger-ui .opblock.opblock-delete { background: rgba(230, 57, 70, 0.15); border-color: #e63946; }
+        
+        /* Execute button */
+        .swagger-ui .btn.execute { background: #d4af37; border-color: #d4af37; color: #000; }
         .swagger-ui .btn.execute:hover { background: #b8973a; }
+        
+        /* Server dropdown */
+        .swagger-ui .scheme-container { background: #252525; }
+        .swagger-ui select { background: #333; color: #fff; border-color: #555; }
+        
+        /* Expand/collapse icons */
+        .swagger-ui .expand-operation svg, .swagger-ui .arrow svg { fill: #ffffff !important; }
     </style>
 </head>
 <body>
