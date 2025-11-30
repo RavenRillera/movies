@@ -20,12 +20,19 @@ const swaggerOptions = {
                 name: 'IT ELEC 3 - Sean, Raven, Noreen'
             }
         },
-        servers: [
-            {
-                url: `http://localhost:${PORT}`,
-                description: 'Development server'
-            }
-        ],
+        servers: process.env.VERCEL_URL 
+            ? [
+                {
+                    url: `https://${process.env.VERCEL_URL}`,
+                    description: 'Production server'
+                }
+            ]
+            : [
+                {
+                    url: `http://localhost:${PORT}`,
+                    description: 'Development server'
+                }
+            ],
         tags: [
             { name: 'Movies', description: 'CRUD operations for movies' },
             { name: 'Reviews', description: 'Operations for movie reviews' }
