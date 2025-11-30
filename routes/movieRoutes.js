@@ -1,166 +1,14 @@
-//================================
-//IT ELEC 3 - Sean, Raven, Noreen
-//================================
 
-require('dotenv').config();
+// routes/movieRoutes.js
 const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const path = require('path');
-const swaggerUi = require('swagger-ui-express');
-const swaggerJsdoc = require('swagger-jsdoc');
-
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// SWAGGER CONFIGURATION
-const swaggerOptions = {
-    definition: {
-        openapi: '3.0.0',
-        info: {
-            title: '🎬 ITelekinesis Movie Review API',
-            version: '1.1.0',
-            contact: {
-                name: 'IT ELEC 3 - Sean, Raven, Noreen'
-            }
-        },
-        servers: [
-            {
-                url: `http://localhost:${PORT}`,
-                description: 'Development server'
-            }
-        ],
-        tags: [
-            { name: 'Movies', description: 'CRUD operations for movies' },
-            { name: 'Reviews', description: 'Operations for movie reviews' }
-        ],
-        components: {
-            schemas: {
-                Review: {
-                    type: 'object',
-                    required: ['rating', 'comment'],
-                    properties: {
-                        _id: { type: 'string', description: 'Auto-generated Review ID', example: '66a1b873f4e2c0e8d0a3d4f1' }, 
-                        rating: { type: 'integer', minimum: 1, maximum: 5, description: 'Rating from 1 to 5', example: 4 },
-                        comment: { type: 'string', description: 'Review comment', example: 'Great movie! Highly recommended.' }
-                    }
-                },
-                Movie: {
-                    type: 'object',
-                    required: ['title'],
-                    properties: {
-                        _id: { type: 'string', description: 'Auto-generated MongoDB ID', example: '507f1f77bcf86cd799439011' },
-                        title: { type: 'string', description: 'Movie title (must be unique)', example: 'Inception' },
-                        reviews: { type: 'array', items: { $ref: '#/components/schemas/Review' }, description: 'Array of reviews' },
-                        createdAt: { type: 'string', format: 'date-time', description: 'Creation timestamp' },
-                        updatedAt: { type: 'string', format: 'date-time', description: 'Last update timestamp' }
-                    }
-                },
-                MovieInput: {
-                    type: 'object',
-                    required: ['title'],
-                    properties: {
-                        title: { type: 'string', description: 'Movie title', example: 'The Dark Knight' }
-                    }
-                },
-                ReviewInput: {
-                    type: 'object',
-                    required: ['rating', 'comment'],
-                    properties: {
-                        rating: { type: 'integer', minimum: 1, maximum: 5, description: 'Rating from 1 to 5', example: 5 },
-                        comment: { type: 'string', description: 'Your review comment', example: 'One of the best movies ever made!' }
-                    }
-                },
-                Error: {
-                    type: 'object',
-                    properties: {
-                        message: { type: 'string', description: 'Error message', example: 'MOVIE NOT FOUND!' }
-                    }
-                },
-                ReviewsResponse: {
-                    type: 'object',
-                    properties: {
-                        movieId: { type: 'string', example: '507f1f77bcf86cd799439011' },
-                        title: { type: 'string', example: 'Inception' },
-                        reviews: { type: 'array', items: { $ref: '#/components/schemas/Review' } }
-                    }
-                }
-            }
-        }
-    },
-    apis: [path.join(__dirname, 'moby.js')]
-};
-
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
-
-const swaggerUiOptions = {
-    customCss: `
-        .swagger-ui .topbar { display: none }
-        .swagger-ui .info .title { color: #d4af37; font-size: 2.5rem; }
-        .swagger-ui .info { margin: 30px 0; }
-        .swagger-ui .info .title small { display: none !important; }
-        .swagger-ui .info .title .version-stamp { display: none !important; }
-        .swagger-ui .info hgroup.main a { display: none !important; }
-        .swagger-ui .info .base-url { display: none !important; }
-        .swagger-ui .info .description { display: none !important; }
-        .swagger-ui .opblock.opblock-get .opblock-summary-method { background: #2a9d8f; }
-        .swagger-ui .opblock.opblock-post .opblock-summary-method { background: #e76f51; }
-        .swagger-ui .opblock.opblock-put .opblock-summary-method { background: #f4a261; }
-        .swagger-ui .opblock.opblock-patch .opblock-summary-method { background: #264653; }
-        .swagger-ui .opblock.opblock-delete .opblock-summary-method { background: #e63946; }
-        .swagger-ui .btn.execute { background: #d4af37; border-color: #d4af37; }
-        .swagger-ui .btn.execute:hover { background: #b8973a; }
-    `,
-    customSiteTitle: 'ITelekinesis API Documentation',
-    customfavIcon: 'https://cdn-icons-png.flaticon.com/512/3418/3418886.png'
-};
-
-// MIDDLEWARE
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
-
-
-// ==================== DATABASE SCHEMAS ====================
-
-const reviewSchema = new mongoose.Schema({
-    rating: { type: Number, required: true, min: 1, max: 5 },
-    comment: { type: String, required: true }
-});
-
-const movieSchema = new mongoose.Schema({
-    title: { type: String, required: true, unique: true },
-    reviews: [reviewSchema]
-}, { timestamps: true });
-
-const Movie = mongoose.model('Movie', movieSchema);
-
-
-// ==================== ENDPOINTS ====================
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
+const Movie = require('../models/Movie'); // Import the Movie model
+const router = express.Router();
 
 // ==================== MOVIES (CRUD) ====================
 
 /**
  * @swagger
- * /:
- *   get:
- *     summary: Welcome endpoint
- *     description: Serves the ITelekinesis frontend application (usually index.html)
- *     responses:
- *       200:
- *         description: Frontend HTML page
- */
-
-/**
- * @swagger
- * /api/v1/movies:
+ * /movies:
  *   get:
  *     summary: Get all movies
  *     description: Retrieve a list of all movies sorted alphabetically by title
@@ -177,7 +25,7 @@ app.get('/', (req, res) => {
  *       500:
  *         description: Internal server error
  */
-app.get('/api/v1/movies', async (req, res) => {
+router.get('/movies', async (req, res) => {
     try {
         const movies = await Movie.find().sort({ title: 1 });
         res.json(movies);
@@ -188,7 +36,7 @@ app.get('/api/v1/movies', async (req, res) => {
 
 /**
  * @swagger
- * /api/v1/movies/{id}:
+ * /movies/{id}:
  *   get:
  *     summary: Get a movie by ID
  *     description: Retrieve a single movie by its MongoDB ID
@@ -212,7 +60,7 @@ app.get('/api/v1/movies', async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-app.get('/api/v1/movies/:id', async (req, res) => {
+router.get('/movies/:id', async (req, res) => {
     try {
         const movie = await Movie.findById(req.params.id);
         if (!movie) {
@@ -220,14 +68,14 @@ app.get('/api/v1/movies/:id', async (req, res) => {
         }
         res.json(movie);
     } catch (err) {
+        // This handles invalid ID format (CastError)
         res.status(500).json({ message: err.message });
     }
 });
 
-
 /**
  * @swagger
- * /api/v1/movies:
+ * /movies:
  *   post:
  *     summary: Create a new movie
  *     description: Add a new movie to the database
@@ -248,7 +96,7 @@ app.get('/api/v1/movies/:id', async (req, res) => {
  *       400:
  *         description: Bad request (title required or duplicate title)
  */
-app.post('/api/v1/movies', async (req, res) => {
+router.post('/movies', async (req, res) => {
     const { title } = req.body;
     if (!title) {
         return res.status(400).json({ message: 'TITLE REQUIRED!' });
@@ -262,10 +110,9 @@ app.post('/api/v1/movies', async (req, res) => {
     }
 });
 
-
 /**
  * @swagger
- * /api/v1/movies/{id}:
+ * /movies/{id}:
  *   put:
  *     summary: Update a movie's title
  *     description: Update the title of an existing movie (Full update)
@@ -295,7 +142,7 @@ app.post('/api/v1/movies', async (req, res) => {
  *       404:
  *         description: Movie not found
  */
-app.put('/api/v1/movies/:id', async (req, res) => {
+router.put('/movies/:id', async (req, res) => {
     const { title: newTitle } = req.body;
     if (!newTitle) {
         return res.status(400).json({ message: 'NEW TITLE REQUIRED!' });
@@ -315,10 +162,9 @@ app.put('/api/v1/movies/:id', async (req, res) => {
     }
 });
 
-
 /**
  * @swagger
- * /api/v1/movies/{id}:
+ * /movies/{id}:
  *   delete:
  *     summary: Delete a movie
  *     description: Remove a movie and all its associated reviews from the database
@@ -342,7 +188,7 @@ app.put('/api/v1/movies/:id', async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-app.delete('/api/v1/movies/:id', async (req, res) => {
+router.delete('/movies/:id', async (req, res) => {
     try {
         const deletedMovie = await Movie.findByIdAndDelete(req.params.id);
         if (!deletedMovie) {
@@ -354,12 +200,11 @@ app.delete('/api/v1/movies/:id', async (req, res) => {
     }
 });
 
-
 // ==================== REVIEWS (Nested Resource CRUD) ====================
 
 /**
  * @swagger
- * /api/v1/movies/{id}/reviews:
+ * /movies/{id}/reviews:
  *   get:
  *     summary: Get all reviews for a movie
  *     description: Retrieve all reviews posted for a specific movie by its ID
@@ -383,7 +228,7 @@ app.delete('/api/v1/movies/:id', async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-app.get('/api/v1/movies/:id/reviews', async (req, res) => {
+router.get('/movies/:id/reviews', async (req, res) => {
     try {
         const movie = await Movie.findById(req.params.id, 'title reviews');
         if (!movie) {
@@ -399,10 +244,9 @@ app.get('/api/v1/movies/:id/reviews', async (req, res) => {
     }
 });
 
-
 /**
  * @swagger
- * /api/v1/movies/{id}/reviews:
+ * /movies/{id}/reviews:
  *   post:
  *     summary: Add a review to a movie
  *     description: Add a new review (rating and comment) to an existing movie
@@ -432,7 +276,7 @@ app.get('/api/v1/movies/:id/reviews', async (req, res) => {
  *       404:
  *         description: Movie not found
  */
-app.post('/api/v1/movies/:id/reviews', async (req, res) => {
+router.post('/movies/:id/reviews', async (req, res) => {
     const { rating, comment } = req.body;
     if (rating === undefined || comment === undefined || rating < 1 || rating > 5) {
         return res.status(400).json({ message: 'INVALID COMMENT AND/OR RATING!' });
@@ -452,10 +296,9 @@ app.post('/api/v1/movies/:id/reviews', async (req, res) => {
     }
 });
 
-
 /**
  * @swagger
- * /api/v1/movies/{movieId}/reviews/{reviewId}:
+ * /movies/{movieId}/reviews/{reviewId}:
  *   patch:
  *     summary: Update a specific review
  *     description: Modify the rating and/or comment of an existing review within a movie.
@@ -500,11 +343,11 @@ app.post('/api/v1/movies/:id/reviews', async (req, res) => {
  *       404:
  *         description: Movie or Review not found
  */
-app.patch('/api/v1/movies/:movieId/reviews/:reviewId', async (req, res) => {
+router.patch('/movies/:movieId/reviews/:reviewId', async (req, res) => {
     const { movieId, reviewId } = req.params;
     const { rating, comment } = req.body;
 
-    if ((rating !== undefined && (rating < 1 || rating > 5)) || (!rating && !comment)) {
+    if ((rating !== undefined && (rating < 1 || rating > 5)) || (rating === undefined && comment === undefined)) {
         return res.status(400).json({ message: 'INVALID RATING (must be 1-5) OR MISSING DATA.' });
     }
 
@@ -516,7 +359,7 @@ app.patch('/api/v1/movies/:movieId/reviews/:reviewId', async (req, res) => {
         const updatedMovie = await Movie.findOneAndUpdate(
             { _id: movieId, 'reviews._id': reviewId },
             { $set: updateFields },
-            { new: true, runValidators: true } 
+            { new: true, runValidators: true }
         );
 
         if (!updatedMovie) {
@@ -530,10 +373,9 @@ app.patch('/api/v1/movies/:movieId/reviews/:reviewId', async (req, res) => {
     }
 });
 
-
 /**
  * @swagger
- * /api/v1/movies/{movieId}/reviews/{reviewId}:
+ * /movies/{movieId}/reviews/{reviewId}:
  *   delete:
  *     summary: Delete a specific review
  *     description: Remove a review from a movie using its ID
@@ -563,18 +405,18 @@ app.patch('/api/v1/movies/:movieId/reviews/:reviewId', async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-app.delete('/api/v1/movies/:movieId/reviews/:reviewId', async (req, res) => {
+router.delete('/movies/:movieId/reviews/:reviewId', async (req, res) => {
     const { movieId, reviewId } = req.params;
 
     try {
         const updatedMovie = await Movie.findByIdAndUpdate(
             movieId,
             { $pull: { reviews: { _id: reviewId } } },
-            { new: true } 
+            { new: true }
         );
 
         if (!updatedMovie) {
-            return res.status(404).json({ message: 'MOVIE NOT FOUND!' }); 
+            return res.status(404).json({ message: 'MOVIE NOT FOUND!' });
         }
 
         res.status(200).json(updatedMovie);
@@ -584,19 +426,4 @@ app.delete('/api/v1/movies/:movieId/reviews/:reviewId', async (req, res) => {
     }
 });
 
-
-// ==================== SERVER STARTUP ====================
-
-async function startServer() {
-    try {
-        await mongoose.connect(process.env.MONGODB_URI);
-        console.log('✅ Connected to MongoDB Atlas');
-        console.log(`🌐 Frontend: http://localhost:${PORT}`);
-        console.log(`📚 API Docs: http://localhost:${PORT}/api-docs`);
-        app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-    } catch (err) {
-        console.error('❌ Failed to connect to MongoDB:', err.message);
-    }
-}
-
-startServer();
+module.exports = router;
