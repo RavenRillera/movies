@@ -2,7 +2,6 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const movieRoutes = require('./routes/movieRoutes');
 
@@ -97,8 +96,30 @@ const swaggerOptions = {
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
-const swaggerUiOptions = {
-    customCss: `
+// MIDDLEWARE
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve Swagger JSON spec
+app.get('/api-docs/swagger.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+});
+
+// Serve Swagger UI with CDN assets (works on Vercel serverless)
+app.get('/api-docs', (req, res) => {
+    const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITelekinesis API Documentation</title>
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3418/3418886.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css">
+    <style>
+        body { margin: 0; background: #1a1a1a; }
         .swagger-ui .topbar { display: none }
         .swagger-ui .info .title { color: #d4af37; font-size: 2.5rem; }
         .swagger-ui .info { margin: 30px 0; }
@@ -114,16 +135,27 @@ const swaggerUiOptions = {
         .swagger-ui .opblock.opblock-delete .opblock-summary-method { background: #e63946; }
         .swagger-ui .btn.execute { background: #d4af37; border-color: #d4af37; }
         .swagger-ui .btn.execute:hover { background: #b8973a; }
-    `,
-    customSiteTitle: 'ITelekinesis API Documentation',
-    customfavIcon: 'https://cdn-icons-png.flaticon.com/512/3418/3418886.png'
-};
-
-// MIDDLEWARE
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+    </style>
+</head>
+<body>
+    <div id="swagger-ui"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-standalone-preset.min.js"></script>
+    <script>
+        window.onload = function() {
+            SwaggerUIBundle({
+                url: '/api-docs/swagger.json',
+                dom_id: '#swagger-ui',
+                presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+                layout: 'StandaloneLayout'
+            });
+        };
+    </script>
+</body>
+</html>`;
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+});
 
 // ROUTES
 app.get('/', (req, res) => {

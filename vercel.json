@@ -8,15 +8,19 @@
   ],
   "routes": [
     {
+      "src": "/api-docs/(.*)",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/api-docs",
+      "dest": "/api/index.js"
+    },
+    {
       "src": "/api/v1/(.*)",
       "dest": "/api/index.js"
     },
     {
-      "src": "/api-docs(.*)",
-      "dest": "/api/index.js"
-    },
-    {
-      "src": "/(.*\\.(js|css|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot))",
+      "src": "/(.*\\.(js|css|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot|map))",
       "dest": "/public/$1"
     },
     {
